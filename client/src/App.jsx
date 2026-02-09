@@ -1,12 +1,13 @@
 import { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
-import Swal from 'sweetalert2'; // Import SweetAlert2
-import './App.css'; // Kita akan buat file CSS ini nanti
+import Swal from 'sweetalert2';
+import './App.css';
 
 function App() {
   const [kartu, setKartu] = useState([]);
-  const [isLoading, setIsLoading] = useState(false); // State untuk loading
-  const fileInputRef = useRef(null); // Ref untuk reset input file
+  const [isLoading, setIsLoading] = useState(false);
+  const [editId, setEditId] = useState(null); // State untuk menyimpan ID yang sedang diedit
+  const fileInputRef = useRef(null);
 
   const [formData, setFormData] = useState({
     nama: '',
@@ -36,75 +37,91 @@ function App() {
     setFormData({ ...formData, foto: e.target.files[0] });
   };
 
+  // Fungsi untuk memasukkan data kartu ke dalam form (Mode Edit)
+  const handleEdit = (item) => {
+    setEditId(item.id);
+    setFormData({
+      nama: item.nama,
+      nomor_ujian: item.nomor_ujian,
+      jurusan: item.jurusan,
+      foto: null // Foto di-reset karena kita tidak bisa set value input type file
+    });
+    
+    // Scroll ke atas agar user melihat form
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // Fungsi membatalkan edit
+  const cancelEdit = () => {
+    setEditId(null);
+    setFormData({ nama: '', nomor_ujian: '', jurusan: '', foto: null });
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    // Validasi sederhana
-    if (!formData.foto) {
-      Swal.fire('Error', 'Silakan pilih foto terlebih dahulu', 'error');
+
+    // Validasi: Foto wajib jika mode CREATE. Jika mode EDIT, foto opsional.
+    if (!editId && !formData.foto) {
+      Swal.fire('Error', 'Silakan pilih foto untuk data baru', 'error');
       return;
     }
 
-    setIsLoading(true); // Mulai loading
+    setIsLoading(true);
     const data = new FormData();
     data.append('nama', formData.nama);
     data.append('nomor_ujian', formData.nomor_ujian);
     data.append('jurusan', formData.jurusan);
-    data.append('foto', formData.foto);
+    
+    // Hanya append foto jika user memilih file baru
+    if (formData.foto) {
+      data.append('foto', formData.foto);
+    }
 
     try {
-      await axios.post('http://localhost:5000/api/kartu', data, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
+      if (editId) {
+        // --- LOGIKA UPDATE (PUT) ---
+        await axios.put(`http://localhost:5000/api/kartu/${editId}`, data, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
+        Swal.fire('Sukses', 'Data berhasil diperbarui!', 'success');
+      } else {
+        // --- LOGIKA CREATE (POST) ---
+        await axios.post('http://localhost:5000/api/kartu', data, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
+        Swal.fire('Sukses', 'Kartu Ujian berhasil dibuat!', 'success');
+      }
 
-      // Notifikasi Sukses
-      Swal.fire({
-        title: 'Berhasil!',
-        text: 'Kartu Ujian berhasil dibuat.',
-        icon: 'success',
-        confirmButtonColor: '#3085d6',
-      });
-
-      // Reset Form
-      setFormData({ nama: '', nomor_ujian: '', jurusan: '', foto: null });
-      if (fileInputRef.current) fileInputRef.current.value = ""; // Reset input file visual
-      
-      fetchKartu(); // Refresh data
+      // Refresh & Reset
+      fetchKartu();
+      cancelEdit(); 
 
     } catch (error) {
       console.error(error);
-      Swal.fire('Gagal', 'Terjadi kesalahan saat upload data.', 'error');
+      Swal.fire('Gagal', 'Terjadi kesalahan sistem.', 'error');
     } finally {
-      setIsLoading(false); // Matikan loading
+      setIsLoading(false);
     }
   };
 
   const handleDelete = async (id) => {
-    // Konfirmasi Hapus dengan SweetAlert
     const result = await Swal.fire({
-      title: 'Apakah Anda yakin?',
-      text: "Data yang dihapus tidak bisa dikembalikan!",
+      title: 'Hapus Data?',
+      text: "Data tidak bisa dikembalikan!",
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#d33',
       cancelButtonColor: '#3085d6',
-      confirmButtonText: 'Ya, hapus!',
-      cancelButtonText: 'Batal'
+      confirmButtonText: 'Ya, hapus!'
     });
 
     if (result.isConfirmed) {
       try {
         await axios.delete(`http://localhost:5000/api/kartu/${id}`);
-        
-        Swal.fire(
-          'Terhapus!',
-          'Data kartu ujian telah dihapus.',
-          'success'
-        );
-        
+        Swal.fire('Terhapus!', 'Data telah dihapus.', 'success');
         fetchKartu();
       } catch (error) {
-        console.error(error);
         Swal.fire('Error', 'Gagal menghapus data.', 'error');
       }
     }
@@ -114,36 +131,22 @@ function App() {
     <div className="container">
       <header className="header">
         <h1>🎓 Sistem Kartu Ujian</h1>
-        <p>Manajemen data peserta ujian dengan Supabase & Cloudinary</p>
       </header>
 
       <div className="main-content">
-        {/* Kolom Kiri: Form Input */}
+        {/* FORM INPUT */}
         <div className="form-container">
-          <h3>Tambah Peserta Baru</h3>
+          <h3>{editId ? '📝 Edit Data Peserta' : '➕ Tambah Peserta Baru'}</h3>
+          
           <form onSubmit={handleSubmit}>
             <div className="form-group">
               <label>Nama Lengkap</label>
-              <input 
-                type="text" 
-                name="nama" 
-                value={formData.nama}
-                placeholder="Contoh: Budi Santoso" 
-                onChange={handleChange} 
-                required 
-              />
+              <input type="text" name="nama" value={formData.nama} onChange={handleChange} required />
             </div>
             
             <div className="form-group">
               <label>Nomor Ujian</label>
-              <input 
-                type="text" 
-                name="nomor_ujian" 
-                value={formData.nomor_ujian}
-                placeholder="Contoh: 2024-001" 
-                onChange={handleChange} 
-                required 
-              />
+              <input type="text" name="nomor_ujian" value={formData.nomor_ujian} onChange={handleChange} required />
             </div>
 
             <div className="form-group">
@@ -158,47 +161,48 @@ function App() {
             </div>
 
             <div className="form-group">
-              <label>Pas Foto</label>
+              <label>Pas Foto {editId && <small>(Biarkan kosong jika tidak ingin ganti foto)</small>}</label>
               <input 
                 type="file" 
                 ref={fileInputRef}
                 onChange={handleFileChange} 
                 accept="image/*"
-                required 
+                required={!editId} // Wajib hanya jika BUKAN mode edit
               />
             </div>
 
-            <button type="submit" disabled={isLoading} className="btn-submit">
-              {isLoading ? 'Mengupload...' : 'Simpan Data'}
-            </button>
+            <div className="button-group">
+              <button type="submit" disabled={isLoading} className="btn-submit">
+                {isLoading ? 'Processing...' : (editId ? 'Update Data' : 'Simpan Data')}
+              </button>
+              
+              {editId && (
+                <button type="button" onClick={cancelEdit} className="btn-cancel">
+                  Batal
+                </button>
+              )}
+            </div>
           </form>
         </div>
 
-        {/* Kolom Kanan: List Kartu */}
+        {/* LIST KARTU */}
         <div className="card-grid">
-          {kartu.length === 0 ? (
-            <p className="empty-state">Belum ada data peserta.</p>
-          ) : (
-            kartu.map((item) => (
-              <div key={item.id} className="card">
-                <div className="card-header">
-                  <span className="badge-jurusan">{item.jurusan}</span>
-                </div>
-                <div className="card-img-wrapper">
-                  <img src={item.foto_url} alt={item.nama} />
-                </div>
-                <div className="card-body">
-                  <h4>{item.nama}</h4>
-                  <p className="nomor-ujian">{item.nomor_ujian}</p>
-                </div>
-                <div className="card-footer">
-                  <button onClick={() => handleDelete(item.id)} className="btn-delete">
-                    Hapus
-                  </button>
-                </div>
+          {kartu.map((item) => (
+            <div key={item.id} className="card">
+              <div className="card-header"><span className="badge-jurusan">{item.jurusan}</span></div>
+              <div className="card-img-wrapper">
+                <img src={item.foto_url} alt={item.nama} />
               </div>
-            ))
-          )}
+              <div className="card-body">
+                <h4>{item.nama}</h4>
+                <p className="nomor-ujian">{item.nomor_ujian}</p>
+              </div>
+              <div className="card-footer">
+                <button onClick={() => handleEdit(item)} className="btn-edit">Edit</button>
+                <button onClick={() => handleDelete(item.id)} className="btn-delete">Hapus</button>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     </div>

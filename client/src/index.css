@@ -18,6 +18,7 @@ a {
   color: #646cff;
   text-decoration: inherit;
 }
+
 a:hover {
   color: #535bf2;
 }
@@ -46,9 +47,11 @@ button {
   cursor: pointer;
   transition: border-color 0.25s;
 }
+
 button:hover {
   border-color: #646cff;
 }
+
 button:focus,
 button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
@@ -59,10 +62,59 @@ button:focus-visible {
     color: #213547;
     background-color: #ffffff;
   }
+
   a:hover {
     color: #747bff;
   }
+
   button {
     background-color: #f9f9f9;
+  }
+
+  /* Tambahkan ini di bagian bawah App.css */
+
+  .button-group {
+    display: flex;
+    gap: 10px;
+  }
+
+  .btn-cancel {
+    background-color: #95a5a6;
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    flex: 1;
+    /* Agar lebar tombol seimbang */
+  }
+
+  .btn-cancel:hover {
+    background-color: #7f8c8d;
+  }
+
+  .card-footer {
+    display: flex;
+    /* Mengatur tombol Edit & Hapus bersebelahan */
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  .btn-edit {
+    background-color: #f39c12;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    flex: 1;
+    cursor: pointer;
+  }
+
+  .btn-edit:hover {
+    background-color: #d35400;
+  }
+
+  .btn-delete {
+    flex: 1;
   }
 }
