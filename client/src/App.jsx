@@ -4,12 +4,15 @@ import Swal from 'sweetalert2';
 import './App.css';
 
 function App() {
+  // --- KONFIGURASI URL API (PENTING UNTUK VERCEL) ---
+  // Jika di Vercel, dia pakai VITE_API_URL. Jika di local, pakai localhost:5000
+  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
   const [kartu, setKartu] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [editId, setEditId] = useState(null);
   const fileInputRef = useRef(null);
 
-  // UBAH STATE: jurusan -> fakultas
   const [formData, setFormData] = useState({
     nama: '',
     nomor_ujian: '',
@@ -17,49 +20,57 @@ function App() {
     foto: null
   });
 
+  // 1. FETCH DATA (READ)
   useEffect(() => {
     fetchKartu();
   }, []);
 
   const fetchKartu = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/kartu');
+      const res = await axios.get(`${API_URL}/api/kartu`);
       setKartu(res.data);
     } catch (error) {
-      console.error("Gagal mengambil data", error);
+      console.error("Gagal mengambil data:", error);
+      // Jangan tampilkan alert jika error koneksi awal agar tidak mengganggu
     }
   };
 
+  // Handle Perubahan Input Teks
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  // Handle Perubahan Input File
   const handleFileChange = (e) => {
     setFormData({ ...formData, foto: e.target.files[0] });
   };
 
+  // Mode Edit: Isi form dengan data yang dipilih
   const handleEdit = (item) => {
     setEditId(item.id);
     setFormData({
       nama: item.nama,
       nomor_ujian: item.nomor_ujian,
-      fakultas: item.fakultas, // Ambil data fakultas
-      foto: null
+      fakultas: item.fakultas,
+      foto: null // Foto di-reset agar user tidak wajib upload ulang jika tidak ingin ganti
     });
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  // Batal Edit
   const cancelEdit = () => {
     setEditId(null);
     setFormData({ nama: '', nomor_ujian: '', fakultas: '', foto: null });
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
+  // 2. SUBMIT (CREATE / UPDATE)
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // Validasi: Foto wajib jika Data Baru. Opsional jika Edit.
     if (!editId && !formData.foto) {
-      Swal.fire('Error', 'Silakan pilih foto untuk data baru', 'error');
+      Swal.fire('Error', 'Silakan pilih pas foto terlebih dahulu', 'error');
       return;
     }
 
@@ -67,53 +78,73 @@ function App() {
     const data = new FormData();
     data.append('nama', formData.nama);
     data.append('nomor_ujian', formData.nomor_ujian);
-    data.append('fakultas', formData.fakultas); // Kirim fakultas
-
+    data.append('fakultas', formData.fakultas);
+    
+    // Hanya kirim foto jika user memilih file baru
     if (formData.foto) {
       data.append('foto', formData.foto);
     }
 
     try {
       if (editId) {
-        await axios.put(`http://localhost:5000/api/kartu/${editId}`, data, {
+        // --- LOGIKA UPDATE (PUT) ---
+        await axios.put(`${API_URL}/api/kartu/${editId}`, data, {
           headers: { 'Content-Type': 'multipart/form-data' }
         });
-        Swal.fire('Sukses', 'Data berhasil diperbarui!', 'success');
+        Swal.fire({
+          title: 'Berhasil!',
+          text: 'Data mahasiswa berhasil diperbarui.',
+          icon: 'success',
+          timer: 2000,
+          showConfirmButton: false
+        });
       } else {
-        await axios.post('http://localhost:5000/api/kartu', data, {
+        // --- LOGIKA CREATE (POST) ---
+        await axios.post(`${API_URL}/api/kartu`, data, {
           headers: { 'Content-Type': 'multipart/form-data' }
         });
-        Swal.fire('Sukses', 'Kartu Ujian berhasil dibuat!', 'success');
+        Swal.fire({
+          title: 'Berhasil!',
+          text: 'Kartu ujian baru berhasil dibuat.',
+          icon: 'success',
+          timer: 2000,
+          showConfirmButton: false
+        });
       }
 
+      // Reset Form & Refresh Data
       fetchKartu();
-      cancelEdit();
+      cancelEdit(); 
 
     } catch (error) {
       console.error(error);
-      Swal.fire('Gagal', 'Terjadi kesalahan sistem.', 'error');
+      const msg = error.response?.data?.error || "Terjadi kesalahan sistem";
+      Swal.fire('Gagal', msg, 'error');
     } finally {
       setIsLoading(false);
     }
   };
 
+  // 3. DELETE (HAPUS)
   const handleDelete = async (id) => {
     const result = await Swal.fire({
       title: 'Hapus Data?',
-      text: "Data tidak bisa dikembalikan!",
+      text: "Data yang dihapus tidak bisa dikembalikan!",
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#d33',
       cancelButtonColor: '#3085d6',
-      confirmButtonText: 'Ya, hapus!'
+      confirmButtonText: 'Ya, hapus!',
+      cancelButtonText: 'Batal'
     });
 
     if (result.isConfirmed) {
       try {
-        await axios.delete(`http://localhost:5000/api/kartu/${id}`);
-        Swal.fire('Terhapus!', 'Data telah dihapus.', 'success');
+        await axios.delete(`${API_URL}/api/kartu/${id}`);
+        Swal.fire('Terhapus!', 'Data mahasiswa telah dihapus.', 'success');
         fetchKartu();
       } catch (error) {
+        console.error(error);
         Swal.fire('Error', 'Gagal menghapus data.', 'error');
       }
     }
@@ -122,23 +153,38 @@ function App() {
   return (
     <div className="container">
       <header className="header">
-        <h1>🎓 Sistem Kartu Ujian Mahasiswa</h1>
+        <h1>🎓 Sistem Kartu Ujian</h1>
+        <p>Universitas Teknologi Digital</p>
       </header>
 
       <div className="main-content">
-        {/* FORM INPUT */}
+        {/* --- FORM INPUT (KIRI) --- */}
         <div className="form-container">
-          <h3>{editId ? '📝 Edit Data Mahasiswa' : '➕ Tambah Mahasiswa'}</h3>
-
+          <h3>{editId ? '📝 Edit Data Mahasiswa' : '➕ Tambah Mahasiswa Baru'}</h3>
+          
           <form onSubmit={handleSubmit}>
             <div className="form-group">
               <label>Nama Lengkap</label>
-              <input type="text" name="nama" value={formData.nama} onChange={handleChange} required />
+              <input 
+                type="text" 
+                name="nama" 
+                value={formData.nama} 
+                onChange={handleChange} 
+                placeholder="Contoh: Budi Santoso"
+                required 
+              />
             </div>
-
+            
             <div className="form-group">
               <label>NIM / Nomor Ujian</label>
-              <input type="text" name="nomor_ujian" value={formData.nomor_ujian} onChange={handleChange} required />
+              <input 
+                type="text" 
+                name="nomor_ujian" 
+                value={formData.nomor_ujian} 
+                onChange={handleChange} 
+                placeholder="Contoh: 2024001"
+                required 
+              />
             </div>
 
             <div className="form-group">
@@ -155,21 +201,21 @@ function App() {
             </div>
 
             <div className="form-group">
-              <label>Pas Foto {editId && <small>(Biarkan kosong jika tidak ganti)</small>}</label>
-              <input
-                type="file"
+              <label>Pas Foto {editId && <small style={{color:'orange'}}>(Upload hanya jika ingin mengganti)</small>}</label>
+              <input 
+                type="file" 
                 ref={fileInputRef}
-                onChange={handleFileChange}
+                onChange={handleFileChange} 
                 accept="image/*"
-                required={!editId}
+                required={!editId} // Wajib hanya jika BUKAN mode edit
               />
             </div>
 
             <div className="button-group">
               <button type="submit" disabled={isLoading} className="btn-submit">
-                {isLoading ? 'Processing...' : (editId ? 'Update Data' : 'Simpan Data')}
+                {isLoading ? 'Sedang Upload...' : (editId ? 'Update Data' : 'Simpan Data')}
               </button>
-
+              
               {editId && (
                 <button type="button" onClick={cancelEdit} className="btn-cancel">
                   Batal
@@ -179,27 +225,30 @@ function App() {
           </form>
         </div>
 
-        {/* LIST KARTU */}
+        {/* --- LIST KARTU (KANAN) --- */}
         <div className="card-grid">
-          {kartu.map((item) => (
-            <div key={item.id} className="card">
-              <div className="card-header">
-                {/* Menampilkan Fakultas di badge */}
-                <span className="badge-jurusan" style={{ fontSize: '0.7rem' }}>{item.fakultas}</span>
+          {kartu.length === 0 ? (
+            <p className="empty-state">Belum ada data mahasiswa.</p>
+          ) : (
+            kartu.map((item) => (
+              <div key={item.id} className="card">
+                <div className="card-header">
+                  <span className="badge-fakultas">{item.fakultas}</span>
+                </div>
+                <div className="card-img-wrapper">
+                  <img src={item.foto_url} alt={item.nama} loading="lazy" />
+                </div>
+                <div className="card-body">
+                  <h4>{item.nama}</h4>
+                  <p className="nomor-ujian">NIM: {item.nomor_ujian}</p>
+                </div>
+                <div className="card-footer">
+                  <button onClick={() => handleEdit(item)} className="btn-edit">Edit</button>
+                  <button onClick={() => handleDelete(item.id)} className="btn-delete">Hapus</button>
+                </div>
               </div>
-              <div className="card-img-wrapper">
-                <img src={item.foto_url} alt={item.nama} />
-              </div>
-              <div className="card-body">
-                <h4>{item.nama}</h4>
-                <p className="nomor-ujian">{item.nomor_ujian}</p>
-              </div>
-              <div className="card-footer">
-                <button onClick={() => handleEdit(item)} className="btn-edit">Edit</button>
-                <button onClick={() => handleDelete(item.id)} className="btn-delete">Hapus</button>
-              </div>
-            </div>
-          ))}
+            ))
+          )}
         </div>
       </div>
     </div>
