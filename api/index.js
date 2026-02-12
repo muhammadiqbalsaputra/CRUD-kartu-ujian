@@ -133,7 +133,7 @@ app.delete('/api/kartu/:id', async (req, res) => {
 
 const PORT = process.env.PORT || 5000;
 
-// HANYA jalankan listen jika di Localhost (Bukan Production)
+// HANYA jalankan app.listen jika di Localhost (Bukan Production)
 if (process.env.NODE_ENV !== 'production') {
   app.listen(PORT, () => {
     console.log(`Server berjalan di port ${PORT}`);

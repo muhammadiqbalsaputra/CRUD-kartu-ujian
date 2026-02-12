@@ -2,7 +2,7 @@
   "name": "project-root",
   "private": true,
   "scripts": {
-    "install-server": "cd server && npm install",
+    "install-server": "cd api && npm install",
     "build-client": "cd client && npm install && npm run build"
   }
 }
