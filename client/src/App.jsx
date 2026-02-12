@@ -3,6 +3,24 @@ import axios from 'axios';
 import Swal from 'sweetalert2';
 import './App.css';
 
+// --- FUNGSI HELPER BARU UNTUK WARNA BADGE ---
+// Fungsi ini menerima nama fakultas dan mengembalikan nama class CSS yang sesuai
+const getFakultasColorClass = (fakultas) => {
+  if (!fakultas) return 'bg-default';
+
+  // Ubah ke huruf kecil agar pencocokan lebih mudah
+  const lowerFakultas = fakultas.toLowerCase();
+
+  if (lowerFakultas.includes('teknik')) return 'bg-teknik';
+  if (lowerFakultas.includes('ekonomi')) return 'bg-ekonomi';
+  if (lowerFakultas.includes('komputer')) return 'bg-komputer';
+  if (lowerFakultas.includes('kedokteran')) return 'bg-kedokteran';
+  if (lowerFakultas.includes('psikologi')) return 'bg-psikologi';
+  if (lowerFakultas.includes('komunikasi')) return 'bg-komunikasi';
+
+  return 'bg-default'; // Warna cadangan jika tidak ada yang cocok
+};
+
 function App() {
   // CONFIG: URL BACKEND (Kita arahkan ke Port 5000)
   const API_URL = '';
@@ -49,7 +67,7 @@ function App() {
       nama: item.nama,
       nomor_ujian: item.nomor_ujian,
       fakultas: item.fakultas,
-      foto: null 
+      foto: null
     });
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -128,11 +146,11 @@ function App() {
           <form onSubmit={handleSubmit}>
             <div className="form-group">
               <label>Nama</label>
-              <input type="text" name="nama" value={formData.nama} onChange={handleChange} required placeholder="Nama Lengkap"/>
+              <input type="text" name="nama" value={formData.nama} onChange={handleChange} required placeholder="Nama Lengkap" />
             </div>
             <div className="form-group">
               <label>NIM</label>
-              <input type="text" name="nomor_ujian" value={formData.nomor_ujian} onChange={handleChange} required placeholder="Nomor Ujian/NIM"/>
+              <input type="text" name="nomor_ujian" value={formData.nomor_ujian} onChange={handleChange} required placeholder="Nomor Ujian/NIM" />
             </div>
             <div className="form-group">
               <label>Fakultas</label>
@@ -158,21 +176,34 @@ function App() {
         </div>
 
         {/* LIST */}
+        {/* --- LIST KARTU (KANAN) --- */}
         <div className="card-grid">
-          {kartu.length === 0 ? <p className="empty-state">Data kosong.</p> : kartu.map((item) => (
-            <div key={item.id} className="card">
-              <div className="card-header"><span className="badge-fakultas">{item.fakultas}</span></div>
-              <div className="card-img-wrapper"><img src={item.foto_url} alt={item.nama} /></div>
-              <div className="card-body">
-                <h4>{item.nama}</h4>
-                <p>NIM: {item.nomor_ujian}</p>
+          {kartu.length === 0 ? (
+            <p className="empty-state">Belum ada data mahasiswa.</p>
+          ) : (
+            kartu.map((item) => (
+              <div key={item.id} className="card">
+                {/* Perhatikan perubahan di sini: Wrapper Gambar & Badge digabung */}
+                <div className="card-img-wrapper">
+                  {/* Gunakan fungsi helper untuk menentukan class warna secara dinamis */}
+                  <span className={`badge-fakultas ${getFakultasColorClass(item.fakultas)}`}>
+                    {item.fakultas}
+                  </span>
+                  <img src={item.foto_url} alt={item.nama} loading="lazy" />
+                </div>
+
+                <div className="card-body">
+                  <h4>{item.nama}</h4>
+                  <p className="nomor-ujian">NIM: {item.nomor_ujian}</p>
+                </div>
+
+                <div className="card-footer">
+                  <button onClick={() => handleEdit(item)} className="btn-edit">Edit</button>
+                  <button onClick={() => handleDelete(item.id)} className="btn-delete">Hapus</button>
+                </div>
               </div>
-              <div className="card-footer">
-                <button onClick={() => handleEdit(item)} className="btn-edit">Edit</button>
-                <button onClick={() => handleDelete(item.id)} className="btn-delete">Hapus</button>
-              </div>
-            </div>
-          ))}
+            ))
+          )}
         </div>
       </div>
     </div>
