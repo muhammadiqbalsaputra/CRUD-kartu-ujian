@@ -154,7 +154,7 @@ function App() {
     <div className="container">
       <header className="header">
         <h1>🎓 Sistem Kartu Ujian</h1>
-        <p>Universitas Teknologi Digital</p>
+        <p>Kartu Ujian Dengan Sistem Database Supabase dan Cloudinary</p>
       </header>
 
       <div className="main-content">
