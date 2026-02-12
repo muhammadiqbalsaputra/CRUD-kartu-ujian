@@ -133,10 +133,12 @@ app.delete('/api/kartu/:id', async (req, res) => {
 
 const PORT = process.env.PORT || 5000;
 
-// Jalankan app.listen 
-app.listen(PORT, () => {
-  console.log(`Server berjalan di port ${PORT}`);
-});
+// HANYA jalankan listen jika di Localhost (Bukan Production)
+if (process.env.NODE_ENV !== 'production') {
+  app.listen(PORT, () => {
+    console.log(`Server berjalan di port ${PORT}`);
+  });
+}
 
-// PENTING UNTUK VERCEL: Export app
+// WAJIB: Export app agar Vercel bisa membacanya
 module.exports = app;
