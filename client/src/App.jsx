@@ -5,7 +5,7 @@ import './App.css';
 
 function App() {
   // CONFIG: URL BACKEND (Kita arahkan ke Port 5000)
-  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+  const API_URL = '';
 
   const [kartu, setKartu] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
