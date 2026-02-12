@@ -1,10 +1,8 @@
 {
-  "name": "kartu-ujian-app",
+  "name": "my-monorepo-app",
   "version": "1.0.0",
   "scripts": {
-    "install-client": "cd client && npm install",
-    "install-server": "cd server && npm install",
-    "build-client": "cd client && npm run build",
-    "vercel-build": "npm run install-client && npm run install-server && npm run build-client"
+    "install-all": "cd client && npm install && cd ../server && npm install",
+    "build": "cd client && npm run build"
   }
 }
