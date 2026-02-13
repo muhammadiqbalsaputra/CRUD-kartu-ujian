@@ -1,4 +1,4 @@
-# 🎓 Sistem Kartu Ujian (Supabase + Cloudinary)
+u# 🎓 Sistem Kartu Ujian (Supabase + Cloudinary)
 
 Aplikasi web sederhana untuk mengelola data kartu ujian siswa. Dibangun menggunakan arsitektur **PERN** (PostgreSQL via Supabase, Express, React, Node.js) dengan fitur upload gambar ke **Cloudinary**.
 
@@ -34,7 +34,7 @@ Aplikasi web sederhana untuk mengelola data kartu ujian siswa. Dibangun mengguna
 Sebelum menjalankan proyek, pastikan Anda memiliki:
 1.  **Node.js** terinstall di komputer.
 2.  Akun **Supabase** (untuk database).
-3.  Akun **Cloudinary** (untuk penyimpanan foto).
+3.  Akun **Cloudinary** (untuk penyimpanan gambar).
 
 ---
 
