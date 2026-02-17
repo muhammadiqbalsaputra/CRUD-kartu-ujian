@@ -1,12 +1,15 @@
-/* App.css */
+/* =========================================
+   1. GLOBAL & RESET
+========================================= */
 * {
   box-sizing: border-box;
 }
 
 body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background-color: #f8f9fa;
   margin: 0;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background-color: #f0f2f5;
+  padding: 0;
   color: #333;
 }
 
@@ -16,240 +19,244 @@ body {
   padding: 20px;
 }
 
-/* Header */
+/* =========================================
+   2. HEADER
+========================================= */
 .header {
   text-align: center;
   margin-bottom: 40px;
+  padding-bottom: 20px;
+  border-bottom: 2px solid #e9ecef;
 }
 
 .header h1 {
   color: #2c3e50;
   margin-bottom: 10px;
+  font-size: 2rem;
 }
 
 .header p {
-  color: #7f8c8d;
+  color: #6c757d;
+  font-size: 1.1rem;
 }
 
-/* Layout Utama */
+/* =========================================
+   3. LAYOUT UTAMA (RESPONSIF INTI)
+========================================= */
 .main-content {
   display: flex;
-  flex-wrap: wrap;
   gap: 30px;
-  align-items: flex-start;
+  align-items: flex-start; /* Agar form tidak ketarik ke bawah */
 }
 
-/* Form Styling */
+/* Kiri: Form Input */
 .form-container {
-  flex: 1;
-  min-width: 300px;
+  flex: 0 0 350px; /* Lebar tetap 350px di desktop */
   background: white;
-  padding: 25px;
+  padding: 24px;
   border-radius: 12px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+  
+  /* UX BONUS: Form 'Nempel' saat di-scroll */
   position: sticky;
-  top: 20px;
+  top: 20px; 
 }
 
+/* Kanan: Grid Kartu */
+.card-grid {
+  flex: 1; /* Mengambil sisa ruang yang ada */
+  display: grid;
+  /* Auto-fit: Otomatis atur jumlah kolom berdasarkan lebar layar */
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 20px;
+}
+
+/* =========================================
+   4. FORM STYLING
+========================================= */
 .form-container h3 {
   margin-top: 0;
   margin-bottom: 20px;
   color: #2c3e50;
-  border-bottom: 2px solid #ecf0f1;
+  border-bottom: 2px solid #f0f0f0;
   padding-bottom: 10px;
 }
 
 .form-group {
-  margin-bottom: 15px;
+  margin-bottom: 16px;
 }
 
 .form-group label {
   display: block;
-  margin-bottom: 5px;
-  font-weight: 600;
+  margin-bottom: 6px;
+  font-weight: 500;
+  color: #495057;
   font-size: 0.9rem;
-  color: #34495e;
 }
 
 .form-group input,
 .form-group select {
   width: 100%;
-  padding: 10px;
-  border: 1px solid #ddd;
+  padding: 10px 12px;
+  border: 1px solid #ced4da;
   border-radius: 6px;
-  font-size: 1rem;
-  transition: border-color 0.3s;
+  font-size: 0.95rem;
+  transition: border-color 0.2s;
 }
 
 .form-group input:focus,
 .form-group select:focus {
-  border-color: #3498db;
   outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 3px rgba(0,123,255,0.1);
+}
+
+/* Tombol */
+.button-group {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
 }
 
 .btn-submit {
-  width: 100%;
-  padding: 12px;
-  background-color: #3498db;
+  flex: 1;
+  background-color: #007bff;
   color: white;
   border: none;
+  padding: 10px;
   border-radius: 6px;
-  font-size: 1rem;
-  font-weight: bold;
+  font-weight: 600;
   cursor: pointer;
-  transition: background 0.3s;
+  transition: background 0.2s;
 }
+.btn-submit:hover { background-color: #0056b3; }
+.btn-submit:disabled { background-color: #ccc; cursor: not-allowed; }
 
-.btn-submit:hover {
-  background-color: #2980b9;
+.btn-cancel {
+  background-color: #6c757d;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
 }
+.btn-cancel:hover { background-color: #545b62; }
 
-.btn-submit:disabled {
-  background-color: #95a5a6;
-  cursor: not-allowed;
-}
-
-/* Grid Kartu */
-.card-grid {
-  display: grid;
-  /* Responsif: Menyesuaikan jumlah kolom berdasarkan lebar layar */
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-  gap: 24px;
-  /* Jarak antar kartu lebih lega */
-  padding: 20px 0;
-}
-
-/* State Kosong */
-.empty-state {
-  text-align: center;
-  padding: 40px;
-  color: #888;
-  font-size: 1.1rem;
-  grid-column: 1 / -1; /* Mengambil lebar penuh grid */
-}
-
-/* Card Styling */
+/* =========================================
+   5. CARD DESIGN (SAMA SEPERTI SEBELUMNYA)
+========================================= */
 .card {
-  background: #ffffff;
-  border-radius: 16px; /* Sudut lebih membulat agar terlihat modern */
-  overflow: hidden; /* Agar gambar mengikuti sudut membulat kartu */
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); /* Bayangan lembut */
-  transition: all 0.3s ease; /* Animasi halus saat hover */
-  border: none; /* Menghapus border garis bawaan */
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  transition: transform 0.2s, box-shadow 0.2s;
   display: flex;
-  flex-direction: column; /* Agar footer selalu di bawah */
+  flex-direction: column;
 }
 
 .card:hover {
-  transform: translateY(-8px); /* Kartu sedikit terangkat ke atas */
-  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15); /* Bayangan lebih tajam */
+  transform: translateY(-5px);
+  box-shadow: 0 8px 16px rgba(0,0,0,0.12);
 }
 
-.card-header {
-  position: absolute;
-  padding: 10px;
-  z-index: 1;
-}
-
-/* --- BADGE FAKULTAS (Bintang Utamanya!) --- */
-.badge-fakultas {
-  position: absolute; /* Mengapung di atas gambar */
-  top: 12px;
-  left: 12px;
-  padding: 6px 14px;
-  border-radius: 20px; /* Bentuk seperti kapsul/pil */
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: white;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2); /* Bayangan kecil agar badge menonjol */
-  z-index: 2; /* Pastikan selalu di atas gambar */
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-/* WARNA-WARNI FAKULTAS (Color Coding) */
-/* Kita akan gunakan class ini nanti di React */
-.bg-teknik { background: linear-gradient(135deg, #007bff, #0056b3); } /* Biru */
-.bg-ekonomi { background: linear-gradient(135deg, #28a745, #1e7e34); } /* Hijau */
-.bg-komputer { background: linear-gradient(135deg, #6f42c1, #5a32a3); } /* Ungu */
-.bg-kedokteran { background: linear-gradient(135deg, #dc3545, #bd2130); } /* Merah */
-.bg-psikologi { background: linear-gradient(135deg, #fd7e14, #e36b09); } /* Oranye */
-.bg-komunikasi { background: linear-gradient(135deg, #e83e8c, #c22e70); } /* Pink */
-.bg-default { background: #6c757d; } /* Abu-abu (jika tidak ada fakultas) */
-
-/* Wrapper Gambar dan Badge Fakultas */
 .card-img-wrapper {
-  position: relative; /* Penting agar badge bisa ditaruh di atasnya */
-  width: 100%;
-  height: 200px; /* Tinggi gambar seragam */
-  background-color: #f0f2f5; /* Warna placeholder jika gambar loading */
+  height: 180px;
+  position: relative;
+  background-color: #eee;
 }
 
 .card-img-wrapper img {
   width: 100%;
   height: 100%;
-  object-fit: cover; /* Gambar mengisi area tanpa terdistorsi/gepeng */
+  object-fit: cover;
 }
 
+.badge-fakultas {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  padding: 4px 12px;
+  border-radius: 20px;
+  color: white;
+  font-size: 0.75rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  z-index: 2;
+}
+
+/* WARNA FAKULTAS */
+.bg-teknik { background: linear-gradient(135deg, #007bff, #0056b3); }
+.bg-ekonomi { background: linear-gradient(135deg, #28a745, #1e7e34); }
+.bg-komputer { background: linear-gradient(135deg, #6f42c1, #5a32a3); }
+.bg-kedokteran { background: linear-gradient(135deg, #dc3545, #bd2130); }
+.bg-psikologi { background: linear-gradient(135deg, #fd7e14, #e36b09); }
+.bg-komunikasi { background: linear-gradient(135deg, #e83e8c, #c22e70); }
+.bg-default { background: #6c757d; }
+
 .card-body {
-  padding: 16px;
-  flex-grow: 1; /* Mengisi ruang kosong agar footer terdorong ke bawah */
+  padding: 15px;
+  flex-grow: 1;
   text-align: center;
 }
 
 .card-body h4 {
-  margin: 0 0 8px;
-  font-size: 1.2rem;
-  color: #333;
-  font-weight: 700;
+  margin: 0 0 5px;
+  font-size: 1.1rem;
 }
 
 .nomor-ujian {
-  margin: 0;
   color: #666;
-  font-weight: 500;
-  font-size: 0.95rem;
-}
-
-/* Bagian Tombol Aksi (Footer) */
-.card-footer {
-  padding: 12px 16px;
-  background-color: #f8f9fa; /* Warna latar sedikit berbeda */
-  border-top: 1px solid #eee;
-  display: flex;
-  gap: 10px; /* Jarak antar tombol */
-}
-
-/* Style Tombol di dalam Kartu */
-.card-footer button {
-  flex: 1; /* Tombol akan membagi lebar sama rata */
-  padding: 8px 0;
-  border-radius: 8px;
   font-size: 0.9rem;
-  transition: background-color 0.2s;
+  margin: 0;
 }
-.btn-edit {
-  background-color: #fff;
-  color: #333;
-  border: 1px solid #ccc;
-}
-.btn-edit:hover { background-color: #e9ecef; }
 
-.btn-delete {
-  background-color: #fee2e2;
-  color: #dc2626;
-  border: 1px solid #fecaca;
+.card-footer {
+  padding: 12px;
+  background: #f8f9fa;
+  display: flex;
+  gap: 8px;
+  border-top: 1px solid #eee;
 }
-.btn-delete:hover { background-color: #fca5a5; color: white;}
 
-/* Responsive Mobile */
+.card-footer button {
+  flex: 1;
+  padding: 6px;
+  border-radius: 4px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+.btn-edit { background: white; border-color: #ddd; color: #333; }
+.btn-delete { background: #fee2e2; border-color: #fecaca; color: #dc2626; }
+
+/* =========================================
+   6. MEDIA QUERIES (HP & TABLET)
+========================================= */
+
+/* Untuk Tablet dan HP (Layar di bawah 768px) */
 @media (max-width: 768px) {
   .main-content {
-    flex-direction: column;
+    flex-direction: column; /* Ubah susunan jadi Atas-Bawah */
   }
 
-  .form-container,
+  .form-container {
+    width: 100%; /* Form memenuhi lebar layar */
+    flex: none; /* Hilangkan setting lebar tetap desktop */
+    position: static; /* Matikan sticky agar tidak aneh di HP */
+    margin-bottom: 20px;
+  }
+
   .card-grid {
     width: 100%;
+    /* Di HP, paksa jadi 1 kolom atau 2 kolom tergantung lebar */
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); 
+  }
+
+  .header h1 {
+    font-size: 1.5rem; /* Perkecil judul */
   }
 }
